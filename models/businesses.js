@@ -1,39 +1,48 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model, DataTypes } = require("sequelize");
+const Tags = require("./Tags");
+
 module.exports = (sequelize, DataTypes) => {
-  class Businesses extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      Businesses.associate = function(models) {
-        // Businesses.belongsToMany(models.Tags, {
-        //   through: 'TagBusinesses',
-        //   as: 'businesses',
-        //   foreignKey: 'businessesId',
-        //   otherKey: 'tagId'
-        // });
-      };
-      
-      // define association here
-    }
-  };
-  Businesses.init({
-    name: DataTypes.STRING,
-    description: DataTypes.STRING,
-    instagram: DataTypes.STRING,
-    whatsapp: DataTypes.NUMBER,
-    facebook: DataTypes.STRING,
-    web: DataTypes.STRING,
-    email: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'Businesses',
+  const Businesses = sequelize.define("Businesses", {
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    instagram: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    whatsapp: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    facebook: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    web: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   });
+
+
+  Businesses.associate = function(models) {
+     Businesses.belongsToMany(models.Tags, {
+      through: 'TagsBusinesses',
+      foreignKey: 'businessId',
+      otherKey: 'tagId'
+    });
+  };
+
   return Businesses;
 };
 
