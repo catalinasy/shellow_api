@@ -1,8 +1,4 @@
 "use strict";
-const Businesses = require("./Businesses");
-const TagsBusinesses = require("./TagsBusinesses");
-
-const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   const Tags = sequelize.define("Tags", {
@@ -11,6 +7,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
   });
+
+  Tags.associate = function(models) {
+    Tags.belongsToMany(models.Businesses, {
+     through: 'TagsBusinesses',
+     foreignKey: 'tagId',
+     otherKey: 'businessId'
+   });
+ };
 
   return Tags;
 };
