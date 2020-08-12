@@ -34,15 +34,14 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-
-  Businesses.associate = function(models) {
-     Businesses.belongsToMany(models.Tags, {
-      through: 'TagsBusinesses',
-      foreignKey: 'businessId',
-      otherKey: 'tagId'
+  Businesses.associate = function (models) {
+    Businesses.belongsToMany(models.Tags, {
+      through: "TagsBusinesses",
+      foreignKey: "businessId",
+      otherKey: "tagId",
     });
+    Businesses.belongsTo(models.GeoData, {as: 'geoData'});
   };
 
   return Businesses;
 };
-

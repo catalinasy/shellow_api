@@ -2,11 +2,12 @@ const models = require("../models");
 const Op = models.Sequelize.Op;
 var Sequelize = require("sequelize");
 
-const { Businesses, Tags, TagsBusinesses } = models;
+const { Businesses, Tags, TagsBusinesses, GeoData } = models;
 
 const getBusinesses = async (req, res) => {
   let businessesList;
-  const search = req.query.tag.split(",");
+  const search = req.query?.tag?.split(",");
+
   req.query.tag
     ? (businessesList = await Promise.all(
         search.map(
@@ -17,14 +18,23 @@ const getBusinesses = async (req, res) => {
                   [Op.like]: `%${query}%`,
                 },
               },
-              include: { model: Businesses, through: TagsBusinesses },
+              include: [
+                {
+                  model: Businesses,
+                  through: TagsBusinesses,
+                  include: { model: GeoData },
+                },
+              ],
             })
         )
       ))
     : (businessesList = await Businesses.findAll({
-        include: { model: Tags, through: TagBusinesses },
+        include: [{
+          model: Tags,
+          through: TagsBusinesses,
+        }, {model: GeoData, as: 'geoData'}]
       }));
-  businessesList = businessesList.flat(1)
+  businessesList = businessesList.flat(1);
 
   res.send(businessesList);
 };
@@ -39,6 +49,10 @@ const createBusiness = async (req, res) => {
     web,
     email,
     tags,
+    shipping,
+    showroom,
+    prov,
+    location,
   } = req.body;
 
   const createdTags = await Promise.all(
@@ -51,17 +65,29 @@ const createBusiness = async (req, res) => {
     })
   );
 
-  const business = await Businesses.create({
-    name,
-    description,
-    instagram,
-    whatsapp,
-    facebook,
-    web,
-    email,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  const business = await Businesses.create(
+    {
+      name,
+      description,
+      instagram,
+      whatsapp,
+      facebook,
+      web,
+      email,
+      geoData: {
+        shipping,
+        showroom,
+        prov,
+        location,
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    },
+    {
+      include: [{ model: GeoData, as: "geoData" }],
+    }
+  );
+
   const createdTagsIds = createdTags.map((t) => t[0].id);
 
   Promise.all(
@@ -83,7 +109,6 @@ const getBusinessesById = async (req, res) => {
 };
 
 const findByTag = async (req, res) => {
-  console.log(req.params, "la request");
   const businessesList = await Businesses.findAll({
     include: models.Tags,
   });
